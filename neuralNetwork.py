@@ -8,7 +8,6 @@ import matplotlib.pyplot
 
 # neural network class definition
 class neuralNetwork:
-    #test!
     
     #initialize the neural network
     def __init__(self, inputnodes, hiddennodes, hiddennodesone, outputnodes, learningrate):
@@ -110,8 +109,6 @@ class neuralNetwork:
 
        
 def main():
-
-    x = 0
     
     # Open and save the training data file
     train_data_file = open("mnist_train.csv",'r')
