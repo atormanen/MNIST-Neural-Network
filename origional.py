@@ -10,21 +10,20 @@ import matplotlib.pyplot
 class neuralNetwork:
 
     #initialize the neural network
-    def __init__(self, inputNodes, hiddenNodes, hiddenNodesone, outputNodes, learningRate):
+    def __init__(self, inputnodes, hiddennodes, hiddennodesone, outputnodes, learningrate):
         #set number of nodes in each input, hidden, output layer
+        self.inodes = inputnodes
+        self.hnodes = hiddennodes
+        self.hnodesone = hiddennodesone
+        self.onodes = outputnodes
 
-        self.inputLayer = inputnodes
-        self.hiddenLayerOne = hiddennodes
-        self.hiddenLayerTwo = hiddennodesone
-        self.outputLayer = outputnodes
-
-        #link weight matricies,  and who
+        #link weight matricies, wih and who
         #wheights inside the arrays are w_i_j, where link is from node i to node j in the next layer
         #w11 w21
         #w12 w22 etc
-        self.weightsOne = numpy.random.normal(0.0, pow(self.hiddenLayerOne, -0.5),(self.hiddenLayerOne, self.inputLayer))
-        self.weightsTwo = numpy.random.normal(0.0, pow(self.hiddenLayerTwo, -0.5),(self.hiddenLayerTwo, self.hiddenLayerOne))
-        self.weightsThree = numpy.random.normal(0.0, pow(self.outputLayer, -0.5), (self.outputLayer, self.hiddenLayerTwo))
+        self.wih = numpy.random.normal(0.0, pow(self.hnodes, -0.5),(self.hnodes, self.inodes))
+        self.wh = numpy.random.normal(0.0, pow(self.hnodesone, -0.5),(self.hnodesone, self.hnodes))
+        self.who = numpy.random.normal(0.0, pow(self.onodes, -0.5), (self.onodes, self.hnodesone))
 
         #learning rate
         self.lr = learningrate
@@ -40,37 +39,35 @@ class neuralNetwork:
         inputs = numpy.array(inputs_list, ndmin=2).T
         targets = numpy.array(targets_list, ndmin=2).T
 
-        #calcualte signals for weightsOne
-        hidden_zero_inputs = numpy.dot(self.weightsOne, inputs)
-        #calculate the signals emerging from hiddenLayerOne
+        #calcualte signals into hidden layer zero
+        hidden_zero_inputs = numpy.dot(self.wih, inputs)
+        #calculate the signals emergin from hidden layer
         hidden_zero_out = self.activation_function(hidden_zero_inputs)
 
-        #calfulate signals for weightsTwo
-        hidden_one = numpy.dot(self.weightsTwo, hidden_zero_out)
-        #calculate the signals emerging from hiddenLayerTwo
+        #calfulate signals into hidden layer one
+        hidden_one = numpy.dot(self.wh, hidden_zero_out)
+        #calculate the signals emerging from the hidden layer
         hidden_one_out = self.activation_function(hidden_one)
 
-        #calcualte signals for weightsThree
-        final_inputs = numpy.dot(self.weightsThree, hidden_one_out)
-        #calculate the signals emerging from outputLayer
+        #calcualte signals into final output layer
+        final_inputs = numpy.dot(self.who, hidden_one_out)
+        #calculate the signals emerging from final output layer
         final_outputs = self.activation_function(final_inputs)
 
         #output layer error is the (target - actual)
         output_errors = targets - final_outputs
         #hidden layer error is the output_errors, split by weights, recombined at hidden nodes
-        hidden_one_errors = numpy.dot(self.wheightsThree.T, output_errors)
-        hidden_zero_errors = numpy.dot(self.weightsThree.T, hidden_one_errors)
+        hidden_one_errors = numpy.dot(self.who.T, output_errors)
+        hidden_zero_errors = numpy.dot(self.wh.T, hidden_one_errors)
 
 
         #update the weights for the links between the hidden and outpu layers
-        self.weightsThree += self.lr * numpy.dot((output_errors * final_outputs * (1.0 -  final_outputs)), numpy.transpose(hidden_one_out))
+        self.who += self.lr * numpy.dot((output_errors * final_outputs * (1.0 -  final_outputs)), numpy.transpose(hidden_one_out))
 
-        self.weightsTwo += self.lr * numpy.dot((hidden_one_errors * hidden_one_out * (1.0 - hidden_one_out)), numpy.transpose(hidden_zero_out))
-
-        self.weightsOne += self.lr * numpy.dot()
+        self.wh += self.lr * numpy.dot((hidden_one_errors * hidden_one_out * (1.0 - hidden_one_out)), numpy.transpose(hidden_zero_out))
 
         #update the weights for the links between the input and hidden layers
-        self. += self.lr * numpy.dot((hidden_zero_errors * hidden_zero_out * (1.0 - hidden_zero_out)), numpy.transpose(inputs))
+        self.wih += self.lr * numpy.dot((hidden_zero_errors * hidden_zero_out * (1.0 - hidden_zero_out)), numpy.transpose(inputs))
         pass
 
     #query the neural network
@@ -79,7 +76,7 @@ class neuralNetwork:
         inputs = numpy.array(inputs_list, ndmin=2).T
 
         #calculate signals into hidden layer
-        hidden_inputs = numpy.dot(self., inputs)
+        hidden_inputs = numpy.dot(self.wih, inputs)
         #calculate the signals emergin from the hidden layer
         hidden_outputs = self.activation_function(hidden_inputs)
 
@@ -97,7 +94,7 @@ class neuralNetwork:
 
 
     def save(self):
-        list = [self.,self.wh,self.who]
+        list = [self.wih,self.wh,self.who]
         pickle_out = open("network", "wb")
         pickle.dump(list, pickle_out)
         pickle_out.close()
