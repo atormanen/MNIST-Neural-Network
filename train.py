@@ -48,7 +48,7 @@ class neuralNetwork:
         hidden_one = numpy.dot(self.wh, hidden_zero_out)
         #calculate the signals emerging from the hidden layer
         hidden_one_out = self.activation_function(hidden_one)
-    
+
         #calcualte signals into final output layer
         final_inputs = numpy.dot(self.who, hidden_one_out)
         #calculate the signals emerging from final output layer
@@ -56,10 +56,10 @@ class neuralNetwork:
 
         #output layer error is the (target - actual)
         output_errors = targets - final_outputs
-        #hidden layer error is the output_errors, split by weights, recombined at hidden nodes   
+        #hidden layer error is the output_errors, split by weights, recombined at hidden nodes
         hidden_one_errors = numpy.dot(self.who.T, output_errors)
         hidden_zero_errors = numpy.dot(self.wh.T, hidden_one_errors)
-      
+
 
         #update the weights for the links between the hidden and outpu layers
         self.who += self.lr * numpy.dot((output_errors * final_outputs * (1.0 -  final_outputs)), numpy.transpose(hidden_one_out))
@@ -70,7 +70,7 @@ class neuralNetwork:
         self.wih += self.lr * numpy.dot((hidden_zero_errors * hidden_zero_out * (1.0 - hidden_zero_out)), numpy.transpose(inputs))
         pass
 
-    
+
     def save(self):
         list = [self.wih,self.wh,self.who]
         pickle_out = open("network", "wb")
@@ -85,7 +85,7 @@ class neuralNetwork:
         return randList
 
 
-       
+
 def main():
     pickle_in = open("network", "rb")
     weights = pickle.load(pickle_in)
@@ -95,7 +95,7 @@ def main():
     train_data_list = train_data_file.readlines()
     train_data_file.close()
 
-    
+
 
     inputnodes = 784
     hiddennodes = 500
@@ -110,7 +110,7 @@ def main():
     start = timer()
 
     # Train the network with a given data set n number of times
-    for n in range(0,165):   
+    for n in range(0,165):
         for record in train_data_list:
             all_values = record.split(',')
             scaled_input = (numpy.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
@@ -118,10 +118,10 @@ def main():
             target[int(all_values[0])] = 0.99
             network.train(scaled_input,target)
     network.save()
-            
-    time = timer() - start   
+
+    time = timer() - start
     print("Time: ",time)
-    
-       
+
+
 
 if __name__ == '__main__': main()

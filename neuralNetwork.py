@@ -1,9 +1,14 @@
+#   Asher Tormanen
+#   Last updated 6/8/2018
+
+
 import numpy
 import scipy.special
 import pickle
 import random
 from timeit import default_timer as timer
 import matplotlib.pyplot
+import os.path
 
 # neural network class definition
 class neuralNetwork:
@@ -63,9 +68,7 @@ class neuralNetwork:
 
         #update the weights in between all of the layers
         self.weightsThree += self.lr * numpy.dot((output_errors * final_outputs * (1.0 -  final_outputs)), numpy.transpose(hidden_two_out))
-
         self.weightsTwo += self.lr * numpy.dot((hidden_two_errors * hidden_two_out * (1.0 - hidden_two_out)), numpy.transpose(hidden_one_out))
-
         self.weightsOne += self.lr * numpy.dot((hidden_one_errors * hidden_one_out * (1.0 - hidden_one_out)), numpy.transpose(inputs))
 
         pass
@@ -95,7 +98,7 @@ class neuralNetwork:
 
     def save(self):
         list = [self.weightsOne,self.weightsTwo,self.weightsThree]
-        pickle_out = open("network", "wb")
+        pickle_out = open("weightsList", "wb")
         pickle.dump(list, pickle_out)
         pickle_out.close()
 
@@ -109,6 +112,7 @@ class neuralNetwork:
 
 
 def main():
+
 
     # Open and save the training data file
     train_data_file = open("mnist_train.csv",'r')
@@ -126,10 +130,15 @@ def main():
 ##    scaled_input = (numpy.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
 
     inputNodes = 784
-    hiddenNodes = 50
-    hiddenNodesOne =30
+    hiddenNodes = 80
+    hiddenNodesOne =15
     outputNodes = 10
     learningRate = 0.1
+
+    if(path.exists("weightsLIst.py")):
+        print("weightsList.py exists")
+        network = neuralNetwork(inputNodes, hiddenNodes, hiddenNodesOne, outputNodes, learningRate)
+
     network = neuralNetwork(inputNodes, hiddenNodes, hiddenNodesOne, outputNodes, learningRate)
 
     # Create a scorecard to keep track of good and bad results
