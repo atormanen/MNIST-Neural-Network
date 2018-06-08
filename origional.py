@@ -4,29 +4,29 @@ import pickle
 import random
 from timeit import default_timer as timer
 import matplotlib.pyplot
+#%matplotlib inline
 
 # neural network class definition
 class neuralNetwork:
 
     #initialize the neural network
-    def __init__(self, inputNodes, hiddenNodes, hiddenNodesOne, outputNodes, learningRate):
+    def __init__(self, inputnodes, hiddennodes, hiddennodesone, outputnodes, learningrate):
         #set number of nodes in each input, hidden, output layer
+        self.inodes = inputnodes
+        self.hnodes = hiddennodes
+        self.hnodesone = hiddennodesone
+        self.onodes = outputnodes
 
-        self.inputLayer = inputNodes
-        self.hiddenLayerOne = hiddenNodes
-        self.hiddenLayerTwo = hiddenNodesOne
-        self.outputLayer = outputNodes
-
-        #link weight matricies,  and who
+        #link weight matricies, wih and who
         #wheights inside the arrays are w_i_j, where link is from node i to node j in the next layer
         #w11 w21
         #w12 w22 etc
-        self.weightsOne = numpy.random.normal(0.0, pow(self.hiddenLayerOne, -0.5),(self.hiddenLayerOne, self.inputLayer))
-        self.weightsTwo = numpy.random.normal(0.0, pow(self.hiddenLayerTwo, -0.5),(self.hiddenLayerTwo, self.hiddenLayerOne))
-        self.weightsThree = numpy.random.normal(0.0, pow(self.outputLayer, -0.5), (self.outputLayer, self.hiddenLayerTwo))
+        self.wih = numpy.random.normal(0.0, pow(self.hnodes, -0.5),(self.hnodes, self.inodes))
+        self.wh = numpy.random.normal(0.0, pow(self.hnodesone, -0.5),(self.hnodesone, self.hnodes))
+        self.who = numpy.random.normal(0.0, pow(self.onodes, -0.5), (self.onodes, self.hnodesone))
 
         #learning rate
-        self.lr = learningRate
+        self.lr = learningrate
 
         #activation funcion is the sigmoid function
         self.activation_function = lambda x:scipy.special.expit(x)
@@ -39,35 +39,35 @@ class neuralNetwork:
         inputs = numpy.array(inputs_list, ndmin=2).T
         targets = numpy.array(targets_list, ndmin=2).T
 
-        #calcualte signals going into hiddenLayerOne
-        hidden_one_inputs = numpy.dot(self.weightsOne, inputs)
-        #apply activation function to nodes in hiddenLayerOne
-        hidden_one_out = self.activation_function(hidden_one_inputs)
+        #calcualte signals into hidden layer zero
+        hidden_zero_inputs = numpy.dot(self.wih, inputs)
+        #calculate the signals emergin from hidden layer
+        hidden_zero_out = self.activation_function(hidden_zero_inputs)
 
-        #calfulate signals going into hiddenLayerTwo
-        hidden_two = numpy.dot(self.weightsTwo, hidden_one_out)
-        #apply activation function to nodes in hiddenLayerTwo
-        hidden_two_out = self.activation_function(hidden_two)
+        #calfulate signals into hidden layer one
+        hidden_one = numpy.dot(self.wh, hidden_zero_out)
+        #calculate the signals emerging from the hidden layer
+        hidden_one_out = self.activation_function(hidden_one)
 
-        #calcualte signals going into outputLayer
-        final_inputs = numpy.dot(self.weightsThree, hidden_two_out)
-        #apply activation function to nodes in outputLayer
+        #calcualte signals into final output layer
+        final_inputs = numpy.dot(self.who, hidden_one_out)
+        #calculate the signals emerging from final output layer
         final_outputs = self.activation_function(final_inputs)
 
         #output layer error is the (target - actual)
         output_errors = targets - final_outputs
         #hidden layer error is the output_errors, split by weights, recombined at hidden nodes
-        hidden_two_errors = numpy.dot(self.weightsThree.T, output_errors)
-        hidden_one_errors = numpy.dot(self.weightsTwo.T, hidden_two_errors)
+        hidden_one_errors = numpy.dot(self.who.T, output_errors)
+        hidden_zero_errors = numpy.dot(self.wh.T, hidden_one_errors)
 
 
-        #update the weights in between all of the layers
-        self.weightsThree += self.lr * numpy.dot((output_errors * final_outputs * (1.0 -  final_outputs)), numpy.transpose(hidden_two_out))
+        #update the weights for the links between the hidden and outpu layers
+        self.who += self.lr * numpy.dot((output_errors * final_outputs * (1.0 -  final_outputs)), numpy.transpose(hidden_one_out))
 
-        self.weightsTwo += self.lr * numpy.dot((hidden_two_errors * hidden_two_out * (1.0 - hidden_two_out)), numpy.transpose(hidden_one_out))
+        self.wh += self.lr * numpy.dot((hidden_one_errors * hidden_one_out * (1.0 - hidden_one_out)), numpy.transpose(hidden_zero_out))
 
-        self.weightsOne += self.lr * numpy.dot((hidden_one_errors * hidden_one_out * (1.0 - hidden_one_out)), numpy.transpose(inputs))
-
+        #update the weights for the links between the input and hidden layers
+        self.wih += self.lr * numpy.dot((hidden_zero_errors * hidden_zero_out * (1.0 - hidden_zero_out)), numpy.transpose(inputs))
         pass
 
     #query the neural network
@@ -75,26 +75,26 @@ class neuralNetwork:
         #convert inputs list to 2d array
         inputs = numpy.array(inputs_list, ndmin=2).T
 
-        #calculate signals going into hiddenLayerOne
-        hidden_inputs = numpy.dot(self.weightsOne, inputs)
-        #apply activation function to hiddenLayerOne
+        #calculate signals into hidden layer
+        hidden_inputs = numpy.dot(self.wih, inputs)
+        #calculate the signals emergin from the hidden layer
         hidden_outputs = self.activation_function(hidden_inputs)
 
-        #calculate signals going into hiddenLayerTwo
-        hidden_middle = numpy.dot(self.weightsTwo, hidden_outputs)
-        #apply activation function to hiddenLayerTwo
+        #calculate signals into middle hidden layer
+        hidden_middle = numpy.dot(self.wh, hidden_outputs)
+        #calculate the signals emerging from the hidden layer
         hidden_middle_out = self.activation_function(hidden_middle)
 
-        #calculate signals going into outputLayer
-        final_inputs = numpy.dot(self.weightsThree, hidden_middle_out)
-        #apply activation function to outputLayer
-        final_outputs = self.activation_function(final_inputs)
+        #calculate signals into final output layer
+        final_inputs = numpy.dot(self.who, hidden_middle_out)
 
+        #calcualte the signals emergin from the final output layer
+        final_outputs = self.activation_function(final_inputs)
         return final_outputs
 
 
     def save(self):
-        list = [self.weightsOne,self.weightsTwo,self.weightsThree]
+        list = [self.wih,self.wh,self.who]
         pickle_out = open("network", "wb")
         pickle.dump(list, pickle_out)
         pickle_out.close()
@@ -125,12 +125,12 @@ def main():
 ##    matplotlib.pyplot.imshow(image_array, cmap='Greys', interpolation='None')
 ##    scaled_input = (numpy.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
 
-    inputNodes = 784
-    hiddenNodes = 50
-    hiddenNodesOne =30
-    outputNodes = 10
-    learningRate = 0.1
-    network = neuralNetwork(inputNodes, hiddenNodes, hiddenNodesOne, outputNodes, learningRate)
+    inputnodes = 784
+    hiddennodes = 50
+    hiddennodesone =30
+    outputnodes = 10
+    learningrate = 0.1
+    network = neuralNetwork(inputnodes, hiddennodes, hiddennodesone, outputnodes, learningrate)
 
     # Create a scorecard to keep track of good and bad results
     scorecard = []
@@ -145,7 +145,7 @@ def main():
         for record in train_data_list:
             all_values = record.split(',')
             scaled_input = (numpy.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
-            target = numpy.zeros(outputNodes) + 0.01
+            target = numpy.zeros(outputnodes) + 0.01
             target[int(all_values[0])] = 0.99
             network.train(scaled_input,target)
     network.save()
