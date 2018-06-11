@@ -1,5 +1,5 @@
 #   Asher Tormanen
-#   Last updated 6/8/2018
+#   Last updated 6/10/2018
 
 
 import numpy
@@ -9,6 +9,7 @@ import random
 from timeit import default_timer as timer
 import matplotlib.pyplot
 import os.path
+from os import path
 
 # neural network class definition
 class neuralNetwork:
@@ -37,8 +38,14 @@ class neuralNetwork:
         self.activation_function = lambda x:scipy.special.expit(x)
         pass
 
+    def networkWithWeights(self,weightsOne, weightsTwo, weightsThree):
+
+        self.weightsOne = weightsOne
+        self.weightsTwo = weightsTwo
+        self.weightsThree = weightsThree
+        pass
+
     #train the neural network
-    #@vectorize(["float32(float32, float32)"], target='cuda')
     def train(self, inputs_list, targets_list):
         #convert inputs list to 2d array
         inputs = numpy.array(inputs_list, ndmin=2).T
@@ -124,22 +131,23 @@ def main():
     test_data_list = test_data_file.readlines()
     test_data_file.close()
 
-##    all_values = data_list[0].split(',')
-##    image_array = numpy.asfarray(all_values[1:]).reshape((28,28))
-##    matplotlib.pyplot.imshow(image_array, cmap='Greys', interpolation='None')
-##    scaled_input = (numpy.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
-
     inputNodes = 784
     hiddenNodes = 80
     hiddenNodesOne =15
     outputNodes = 10
-    learningRate = 0.1
-
-    if(path.exists("weightsLIst.py")):
-        print("weightsList.py exists")
-        network = neuralNetwork(inputNodes, hiddenNodes, hiddenNodesOne, outputNodes, learningRate)
+    learningRate = 0.025
 
     network = neuralNetwork(inputNodes, hiddenNodes, hiddenNodesOne, outputNodes, learningRate)
+
+    if(path.exists("weightsList")):
+        print("weightsList.py exists")
+        pickleIn = open("weightsList", "rb")
+        weights = pickle.load(pickleIn)
+        network.networkWithWeights(weights[0], weights[1], weights[2])
+        print(weights[0])
+    else:
+        print("weightsList.py does not exist")
+
 
     # Create a scorecard to keep track of good and bad results
     scorecard = []
@@ -150,7 +158,7 @@ def main():
     start = timer()
 
     # Train the network with a given data set n number of times
-    for n in range(0,1):
+    for n in range(0,10):
         for record in train_data_list:
             all_values = record.split(',')
             scaled_input = (numpy.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
@@ -170,7 +178,7 @@ def main():
             hit = hit + 1
         else:
             miss = miss + 1
-            print("Value: ",correct_label,"   Network Value: ",label)
+            #print("Value: ",correct_label,"   Network Value: ",label)
 
     time = timer() - start
     print("\nHit: ",hit)
